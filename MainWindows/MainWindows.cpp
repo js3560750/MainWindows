@@ -5,13 +5,13 @@ MainWindows::MainWindows(QWidget *parent)
 {
 	ui.setupUi(this);
 	
-	sceneWindwos = new SceneWindows;
-	sceneWindwos->show();
+	sceneWindows = new SceneWindows;
+	sceneWindows->show();
 
 	//场景选择
-	connect(sceneWindwos, &SceneWindows::sendSceneSignal1, this, &MainWindows::login1);
-	connect(sceneWindwos, &SceneWindows::sendSceneSignal2, this, &MainWindows::login2);
-	connect(sceneWindwos, &SceneWindows::sendSceneSignal3, this, &MainWindows::login3);
+	connect(sceneWindows, &SceneWindows::sendSceneSignal1, this, &MainWindows::login1);
+	connect(sceneWindows, &SceneWindows::sendSceneSignal2, this, &MainWindows::login2);
+	connect(sceneWindows, &SceneWindows::sendSceneSignal3, this, &MainWindows::login3);
 
 	//各场景公用参数初始化
 	initCamera();
@@ -23,6 +23,18 @@ MainWindows::MainWindows(QWidget *parent)
 
 	//查看检测需求
 	connect(ui.buttonCheckRequirement, &QPushButton::clicked, this, &MainWindows::checkRequirement);
+
+	//确定精度
+	connect(ui.buttonAccuracy, &QPushButton::clicked, this, &MainWindows::checkAccuracy);
+
+	//上一步
+	connect(ui.buttonLast, &QPushButton::clicked, this, &MainWindows::toLast);
+	//下一步
+	connect(ui.buttonNext, &QPushButton::clicked, this, &MainWindows::toNext);
+	
+
+	//选择好了难度
+	connect(hardChooseWindows, &HardChooseWindows::okSignal, this, &MainWindows::levelOK);
 }
 
 /************************************************************************/
@@ -32,21 +44,21 @@ void MainWindows::login1() {
 	m_iScene = 1;
 	initGraphicsView();	//选择场景之后再初始化图片
 	this->show();
-	sceneWindwos->close();
+	sceneWindows->close();
 }
 
 void MainWindows::login2() {
 	m_iScene = 2;
 	initGraphicsView();//选择场景之后再初始化图片
 	this->show();
-	sceneWindwos->close();
+	sceneWindows->close();
 }
 
 void MainWindows::login3() {
 	m_iScene = 3;
 	initGraphicsView();//选择场景之后再初始化图片
 	this->show();
-	sceneWindwos->close();
+	sceneWindows->close();
 }
 
 /************************************************************************/
@@ -117,6 +129,8 @@ void MainWindows::boxChangeCamera(int index) {
 	QString xiangSuChiCun = QStringLiteral("像素尺寸： ") + config->value("/Camera" + QString::number(index) + "/xiangSuChiCun").toString() + QString("<br><br>");
 	QString str = fenBianLv + zhenLv + xiangSuChiCun;
 	ui.labelCameraDetail->setText(str);
+
+	m_iCamera = index;	//标记用户选择几号相机
 }
 
 //镜头选择的变化
@@ -143,10 +157,12 @@ void MainWindows::boxChangeLens(int index) {
 	QString juLi = QStringLiteral("工作距离： ") + config->value("/Lens" + QString::number(index) + "/juLi").toString() + QString("<br><br>");
 	QString str = baMianChiCun + jiaoJu + chengXiangChiCun+ juLi;
 	ui.labelLensDetail->setText(str);
+
+	m_iLens = index;	//标记用户选择几号镜头
 }
 
 //光源选择初始化
-void MainWindows::initLD(){
+void MainWindows::initLS(){
 	ui.comboBoxLightSource->addItem(QStringLiteral("请选择"));
 	ui.comboBoxLightSource->addItem(QStringLiteral("光源1:MSU-10-SW/BL/GR"));
 	ui.comboBoxLightSource->addItem(QStringLiteral("光源2:MSU-30-SW/BL/GR"));
@@ -154,9 +170,9 @@ void MainWindows::initLD(){
 	connect(ui.comboBoxLightSource,
 		static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 		this,
-		&MainWindows::boxChangeLD);
+		&MainWindows::boxChangeLS);
 }
-void MainWindows::boxChangeLD(int index){
+void MainWindows::boxChangeLS(int index){
 	//读取配置文件
 	QSettings *config = new QSettings("./Profile/initMainWindows.ini", QSettings::IniFormat);
 	config->setIniCodec("UTF8");	//解决中文乱码
@@ -164,10 +180,12 @@ void MainWindows::boxChangeLD(int index){
 	QString color = QStringLiteral("颜色： ") + config->value("/LightSource" + QString::number(index) + "/color").toString() + QString("<br><br>");
 	QString str = chiCun + color;
 	ui.labelLightSourceDetail->setText(str);
+
+	m_iLS = index;	//标记用户选择几号光源
 }
 
 //光源距离选择的初始化
-void MainWindows::initLS() {
+void MainWindows::initLD() {
 	ui.comboBoxLightDistance->addItem(QStringLiteral("请选择"));
 	ui.comboBoxLightDistance->addItem(QStringLiteral("远"));
 	ui.comboBoxLightDistance->addItem(QStringLiteral("中"));
@@ -175,14 +193,16 @@ void MainWindows::initLS() {
 	connect(ui.comboBoxLightDistance,
 		static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 		this,
-		&MainWindows::boxChangeLS);
+		&MainWindows::boxChangeLD);
 }
-void MainWindows::boxChangeLS(int index) {
+void MainWindows::boxChangeLD(int index) {
 	qDebug() << index;
 	QString str = QString::number(index);	//QT中int和String的转型
 	QMessageBox msgBox;
 	msgBox.setInformativeText(str);
 	msgBox.exec();
+
+	m_iLD = index;	//标记用户选择几号光源距离
 }
 
 //图片初始化
@@ -212,4 +232,89 @@ void MainWindows::initGraphicsView() {
 	scene->addPixmap(QPixmap(str));
 	ui.graphicsView->setScene(scene);
 	ui.graphicsView->show();
+}
+
+//上一步
+void MainWindows::toLast() {
+	this->close();
+	sceneWindows->show();
+	
+}
+
+//下一步
+void MainWindows::toNext() {
+
+	bool flag = checkAccuracy();	//查看用户输入的精度合格否
+	if (flag==false)
+	{
+		QMessageBox msgBox;	//QMessageBox系统强制限制了自适应窗口的大小，不能额外设置大小，除非重写其构造函数
+		msgBox.setWindowTitle(QStringLiteral("通知"));
+		msgBox.setInformativeText(QStringLiteral("输入的精度不符合实验要求"));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.exec();
+	}
+	else
+	{
+		//检测精度通过后选择实验难度
+		hardChooseWindows = new HardChooseWindows();
+		hardChooseWindows->setWindowTitle(QStringLiteral("难度选择"));
+		hardChooseWindows->setWindowModality(Qt::ApplicationModal);	//设置QWidget窗口为模糊窗口，该QWidget必须没有传入父类
+		hardChooseWindows->show();
+		
+
+	}
+
+	
+
+}
+
+/************************************************************************/
+/* 确定精度                                                              */
+/************************************************************************/
+bool MainWindows::checkAccuracy() {
+	
+	double inputAccuracy = ui.spinBoxAccuracy->value();	//获取用户输入的精度
+	if (inputAccuracy==NULL&&inputAccuracy==0)
+	{
+		QMessageBox msgBox;	//QMessageBox系统强制限制了自适应窗口的大小，不能额外设置大小，除非重写其构造函数
+		msgBox.setWindowTitle(QStringLiteral("通知"));
+		msgBox.setInformativeText(QStringLiteral("请输入精度"));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.exec();
+		return false;
+	}
+	qDebug() << inputAccuracy;
+
+	//读取配置文件，获得不同场景所需的精度
+	QSettings *config = new QSettings("./Profile/initMainWindows.ini", QSettings::IniFormat);
+	config->setIniCodec("UTF8");	//解决中文乱码
+	double sceneAccuracy = config->value("/SceneAccuracy" + QString::number(m_iScene) + "/accuracy").toDouble();
+	
+	//如果用户输入精度小于场景所需精度，则返回true
+	if (inputAccuracy<=sceneAccuracy)
+	{
+		QMessageBox msgBox;	//QMessageBox系统强制限制了自适应窗口的大小，不能额外设置大小，除非重写其构造函数
+		msgBox.setWindowTitle(QStringLiteral("通知"));
+		msgBox.setInformativeText(QStringLiteral("输入精度符合要求"));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.exec();
+		return true;
+	}
+	else
+	{
+		QMessageBox msgBox;	//QMessageBox系统强制限制了自适应窗口的大小，不能额外设置大小，除非重写其构造函数
+		msgBox.setWindowTitle(QStringLiteral("通知"));
+		msgBox.setInformativeText(QStringLiteral("输入的精度不符合实验要求"));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.exec();
+		return false;
+	}
+
+}
+
+/************************************************************************/
+/* 选择好了难度                                                          */
+/************************************************************************/
+void MainWindows::levelOK() {
+	
 }

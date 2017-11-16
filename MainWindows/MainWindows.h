@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_MainWindows.h"
 #include "SceneWindows.h"
+#include "HardChooseWindows.h"
 #include <QDialog>
 #include <QMessageBox>
 #include <QDebug>
@@ -15,8 +16,9 @@ class MainWindows : public QMainWindow
 
 public:
 	MainWindows(QWidget *parent = Q_NULLPTR);
-	SceneWindows *sceneWindwos;
+	SceneWindows *sceneWindows;
 	QDialog *dialog;
+	HardChooseWindows *hardChooseWindows;
 
 	void initCamera();
 	void initLens();
@@ -26,7 +28,11 @@ public:
 
 private:
 	Ui::MainWindowsClass ui;
-	int m_iScene;
+	int m_iScene;	//用户选择的场景
+	int m_iCamera;	//用户选择的相机
+	int m_iLens;	//用户选择的镜头
+	int m_iLS;		//用户选择的光源
+	int m_iLD;		//用户选择的光源距离
 
 private slots:
 	//场景选择
@@ -45,5 +51,16 @@ private slots:
 	void boxChangeLS(int);
 	//光源距离选择的变化
 	void boxChangeLD(int);
+
+	//确定精度
+	bool checkAccuracy();
+
+	//上一步
+	void toLast();
+	//下一步
+	void toNext();
+
+	//选择好了难度
+	void levelOK();
 
 };
