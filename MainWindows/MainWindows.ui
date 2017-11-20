@@ -218,7 +218,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -243,7 +243,7 @@
         </size>
        </property>
        <property name="text">
-        <string>上一步</string>
+        <string>场景选择</string>
        </property>
       </widget>
      </item>

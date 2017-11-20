@@ -71,7 +71,7 @@ public:
     QLabel *label_8;
     QDoubleSpinBox *spinBoxAccuracy;
     QPushButton *buttonAccuracy;
-    QWidget *widget;
+    QWidget *layoutWidget2;
     QHBoxLayout *horizontalLayout_6;
     QPushButton *buttonLast;
     QSpacerItem *horizontalSpacer;
@@ -284,15 +284,15 @@ public:
 
         horizontalLayout_5->addWidget(buttonAccuracy);
 
-        widget = new QWidget(centralWidget);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(10, 700, 986, 30));
-        horizontalLayout_6 = new QHBoxLayout(widget);
+        layoutWidget2 = new QWidget(centralWidget);
+        layoutWidget2->setObjectName(QStringLiteral("layoutWidget2"));
+        layoutWidget2->setGeometry(QRect(10, 700, 986, 30));
+        horizontalLayout_6 = new QHBoxLayout(layoutWidget2);
         horizontalLayout_6->setSpacing(6);
         horizontalLayout_6->setContentsMargins(11, 11, 11, 11);
         horizontalLayout_6->setObjectName(QStringLiteral("horizontalLayout_6"));
         horizontalLayout_6->setContentsMargins(0, 0, 0, 0);
-        buttonLast = new QPushButton(widget);
+        buttonLast = new QPushButton(layoutWidget2);
         buttonLast->setObjectName(QStringLiteral("buttonLast"));
         buttonLast->setMinimumSize(QSize(151, 28));
         buttonLast->setMaximumSize(QSize(151, 28));
@@ -303,7 +303,7 @@ public:
 
         horizontalLayout_6->addItem(horizontalSpacer);
 
-        buttonNext = new QPushButton(widget);
+        buttonNext = new QPushButton(layoutWidget2);
         buttonNext->setObjectName(QStringLiteral("buttonNext"));
         buttonNext->setMinimumSize(QSize(151, 28));
         buttonNext->setMaximumSize(QSize(151, 28));
@@ -340,7 +340,7 @@ public:
         labelLightDistance->setText(QApplication::translate("MainWindowsClass", "\345\205\211\346\272\220\350\267\235\347\246\273\357\274\232", Q_NULLPTR));
         label_8->setText(QApplication::translate("MainWindowsClass", "\346\265\213\351\207\217\347\262\276\345\272\246\357\274\232", Q_NULLPTR));
         buttonAccuracy->setText(QApplication::translate("MainWindowsClass", "\347\241\256\345\256\232", Q_NULLPTR));
-        buttonLast->setText(QApplication::translate("MainWindowsClass", "\344\270\212\344\270\200\346\255\245", Q_NULLPTR));
+        buttonLast->setText(QApplication::translate("MainWindowsClass", "\345\234\272\346\231\257\351\200\211\346\213\251", Q_NULLPTR));
         buttonNext->setText(QApplication::translate("MainWindowsClass", "\344\270\213\344\270\200\346\255\245", Q_NULLPTR));
     } // retranslateUi
 
