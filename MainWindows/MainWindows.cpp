@@ -5,8 +5,37 @@ MainWindows::MainWindows(QWidget *parent)
 {
 	ui.setupUi(this);
 	
+	
+	//赋初值，不能在头文件中赋初值，头文件中只是声明
+	m_iGSFilter = 0;	//中级难度高斯滤波所用参数
+	sceneWindows = nullptr;	//不初始化的话指针值的初始值是乱值
+	dialog = nullptr;
+	hardChooseWindows = NULL;	
+	//NULL无类型，nullptr有类型,类型是nullptr_t，我们应该使用nullptr，这给我们编译器实现nullptr的时候带来了更多细节的考虑，当然也给了使用者更多的保障，
+	/*
+	void f(void*)
+{
+}
+
+void f(int)
+{
+}
+
+int main()
+{
+	f(0); // what function will be called?
+}
+
+而引入了nullptr，这个问题就得到了真正解决，会很顺利的调到void f(void*)这个版本。
+	*/
+	levelEasyWindows = nullptr;
+	levelMiddleWindows = nullptr;
+
+
+
 	sceneWindows = new SceneWindows;
 	sceneWindows->show();
+
 
 	//场景选择
 	connect(sceneWindows, &SceneWindows::sendSceneSignal1, this, &MainWindows::login1);
@@ -264,7 +293,9 @@ void MainWindows::toLast() {
 	if (NULL!=levelEasyWindows) {
 		levelEasyWindows->close();
 	}
-	
+	if (NULL != levelMiddleWindows) {
+		levelMiddleWindows->close();
+	}
 	if (ui.buttonNext->isHidden())
 	{
 		ui.buttonNext->setHidden(false);
@@ -652,25 +683,28 @@ void MainWindows::commonEdgeDetect(QString str) {
 /************************************************************************/
 void MainWindows::GSFilter_msg() {
 	QDialog *gsDialog = new QDialog();
-	gsDialog->resize(300, 300);	//设置窗口大小，并且可用鼠标拖动
+	gsDialog->resize(300, 150);	//设置窗口大小，并且可用鼠标拖动
 	gsDialog->setAttribute(Qt::WA_DeleteOnClose);	//防止内存泄露，设置 dialog 的属性为WA_DeleteOnClose，那么当对话框关闭时，对象被销毁，不能获得对话框数据！！！！！！！！
 	gsDialog->setWindowTitle(QStringLiteral("高斯滤波"));
+	QLabel *label = new QLabel(gsDialog);
+	label->setText("Size:");
+	label->setFrameShape(QFrame::Box);	//设置标签边界样式
 	QSpinBox *spinBox = new QSpinBox(gsDialog);
-	spinBox->setRange(0, 100);
+	spinBox->setRange(1, 15);
 	spinBox->setValue(3);
 	QPushButton *pushButton = new QPushButton(gsDialog);
 	pushButton->setText(QStringLiteral("确定"));
-	QHBoxLayout *layout = new QHBoxLayout(gsDialog);
-	layout->addWidget(spinBox);
-	layout->addWidget(pushButton);
+	QGridLayout *layout = new QGridLayout(gsDialog);
+	layout->addWidget(label,0,0,1,1);	//后面四个数是（第0行，第0列，占1行，占1列）
+	layout->addWidget(spinBox,0,1,1,1);
+	layout->addWidget(pushButton,2,1,1,1);
 	gsDialog->setLayout(layout);
 
-	m_iGSFilter = spinBox->value();
-	//void (QSpinBox:: *spinBoxSignal)(int) = &QSpinBox::valueChanged;
+	m_iGSFilter = spinBox->value();	//先获得默认值
 	connect(spinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value)
 	{
-		qDebug() << "Value : " << value;
-		m_iGSFilter = value;
+		//qDebug() << "Value : " << value;
+		m_iGSFilter = value;	//如果调整参数，则实时赋给m_iGSFilter
 	});
 	connect(pushButton, &QPushButton::clicked, this, &MainWindows::GSFilter_parameter);
 	connect(pushButton, &QPushButton::clicked, gsDialog, &QDialog::close);
@@ -679,11 +713,19 @@ void MainWindows::GSFilter_msg() {
 
 
 void MainWindows::GSFilter_parameter() {
-	
+	if (m_iGSFilter!=1&& m_iGSFilter!=3&&m_iGSFilter!=7&&m_iGSFilter != 15)
+	{
+		QMessageBox msgBox;	//QMessageBox系统强制限制了自适应窗口的大小，不能额外设置大小，除非重写其构造函数
+		msgBox.setWindowTitle(QStringLiteral("通知"));
+		msgBox.setInformativeText(QStringLiteral("Size参数必须为1、3、7、15"));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.exec();
+		return;
+	}
 	//先读取当前GraphicsView显示的图片
 	cv::Mat img = cv::imread("./images/currentImage.jpg");
 	cv::Mat out;
-	qDebug() << "GS Size:"<< m_iGSFilter;
+	//qDebug() << "GS Size:"<< m_iGSFilter;
 	GaussianBlur(img, out, cv::Size(m_iGSFilter, m_iGSFilter), 0, 0);
 
 	//将处理后的图片继续保存为currentImage.jpg

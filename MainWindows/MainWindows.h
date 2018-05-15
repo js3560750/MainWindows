@@ -23,11 +23,11 @@ class MainWindows : public QMainWindow
 
 public:
 	MainWindows(QWidget *parent = Q_NULLPTR);
-	SceneWindows *sceneWindows=nullptr;	//不初始化的话指针值的初始值是乱值
-	QDialog *dialog=nullptr;
-	HardChooseWindows *hardChooseWindows=NULL;
-	LevelEasy *levelEasyWindows=NULL;
-	LevelMiddle *levelMiddleWindows = NULL;
+	SceneWindows *sceneWindows;	//不初始化的话指针值的初始值是乱值
+	QDialog *dialog;
+	HardChooseWindows *hardChooseWindows;
+	LevelEasy *levelEasyWindows;
+	LevelMiddle *levelMiddleWindows;
 
 	void initCamera();
 	void initLens();
@@ -43,7 +43,7 @@ private:
 	int m_iLS;		//用户选择的光源
 	int m_iLD;		//用户选择的光源距离
 	
-	int m_iGSFilter=0;	//中级难度高斯滤波所用参数
+	int m_iGSFilter;	//中级难度高斯滤波所用参数
 
 signals:
 	void GSFilterSignal(int);
